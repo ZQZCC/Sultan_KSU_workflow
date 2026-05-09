@@ -25,6 +25,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - codename: zuma
+            kernel_branch: 16.0.0-sultan
+            kernel_repo: https://github.com/kerneltoast/android_kernel_google_tensynos
+            anykernel_branch: sultan-zuma
+            defconfig: zuma_defconfig
+            dtb_path: google-devices/zuma/dts
+            device_label: zuma
+          - codename: gs201
+            kernel_branch: 16.0.0-sultan
+            kernel_repo: https://github.com/kerneltoast/android_kernel_google_tensynos
+            anykernel_branch: sultan-gs201
+            defconfig: gs201_defconfig
+            dtb_path: google-devices/gs201/dts
+            device_label: gs201
           - codename: zumapro
             kernel_branch: 16.0.0-sultan
             kernel_repo: https://github.com/kerneltoast/android_kernel_google_tensynos
@@ -80,7 +94,7 @@ jobs:
         working-directory: sultan
         run: |
           echo "=== Scanning All Relevant Defconfigs ==="
-          TARGET_DEFS=("zumapro_defconfig")
+          TARGET_DEFS=("gs201_defconfig" "zuma_defconfig" "zumapro_defconfig")
           CHECK_FLAGS=("CONFIG_NETFILTER_ADVANCED" "CONFIG_NETFILTER_XT_MATCH_ADDRTYPE" "CONFIG_KSU")
           for def in "${TARGET_DEFS[@]}"; do
             CONF_PATH="arch/arm64/configs/$def"
