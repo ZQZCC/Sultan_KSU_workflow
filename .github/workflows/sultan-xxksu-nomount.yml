@@ -14,8 +14,8 @@ env:
   KSU_REPO: backslashxx/KernelSU
   KSU_BRANCH: master
   KSU_COMMIT: 32472
-  GCC_VERSION: "15.2.0"
-  GCC_ARCHIVE_URL: "https://kernel.org/pub/tools/crosstool/files/bin/x86_64/15.2.0/x86_64-gcc-15.2.0-nolibc-aarch64-linux.tar.gz"
+  GCC_VERSION: "14.2.0"
+  GCC_ARCHIVE_URL: "https://kernel.org/pub/tools/crosstool/files/bin/x86_64/14.2.0/x86_64-gcc-14.2.0-nolibc-aarch64-linux.tar.gz"
 
 jobs:
   build:
