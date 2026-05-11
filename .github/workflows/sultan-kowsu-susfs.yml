@@ -268,7 +268,7 @@ jobs:
 
           echo "--- Applying 10 patch (KowSU side) ---"
           cd KernelSU
-          patch -p1 -l --fuzz=3 < ../../kernel_patches/kowsu/10_enable_susfs_for_ksu.patch
+          patch -p1 --forward < ../../kernel_patches/kowsu/10_enable_susfs_for_ksu.patch
 
       # -----------------------------------------------------------------------
       - name: Build kernel
