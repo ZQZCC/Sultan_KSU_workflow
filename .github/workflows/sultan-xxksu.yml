@@ -1,4 +1,4 @@
-name: Build Sultan + xxKSU with arm gcc
+name: Build Sultan + xxKSU
 
 on:
   workflow_dispatch:
@@ -184,7 +184,6 @@ jobs:
           CROSS_COMPILE: ${{ env.TOOLCHAIN_PATH }}
           CC: ${{ env.TOOLCHAIN_PATH }}gcc
         run: |
-          make O=out CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" ${{ matrix.kernel.defconfig }}
           make O=out CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" CFLAGS="$CFLAGS -flto" LDFLAGS="$LDFLAGS -flto" -j"$(nproc --all)"
 
 
