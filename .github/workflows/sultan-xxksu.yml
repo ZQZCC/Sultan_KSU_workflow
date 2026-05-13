@@ -42,7 +42,7 @@ jobs:
 
       - name: Clone Source
         run: |
-          git clone --depth=1 https://github.com/kerneltoast/android_kernel_google_tensynos -b 16.0.0-sultan sultan
+          git clone --depth=1 https://github.com/ZQZCC/android_kernel_google_tensynos -b 16.0.0-sultan sultan
           git clone --depth=1 "${{ env.ANYKERNEL_REPO }}" -b sultan-zumapro AK3
           git clone --depth=1 "${{ env.PATCHES_REPO }}" kernel_patches
           git clone --depth=1 "${{ env.SCRIPTS_REPO }}" sh
