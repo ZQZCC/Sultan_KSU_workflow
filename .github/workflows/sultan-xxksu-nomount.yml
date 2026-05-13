@@ -13,44 +13,15 @@ env:
   SCRIPTS_REPO: https://github.com/TheSillyOk/sh
   KSU_REPO: backslashxx/KernelSU
   KSU_BRANCH: master
-  KSU_COMMIT: 32472
-  GCC_VERSION: "14.2.0"
-  GCC_ARCHIVE_URL: "https://kernel.org/pub/tools/crosstool/files/bin/x86_64/14.2.0/x86_64-gcc-14.2.0-nolibc-aarch64-linux.tar.gz"
+  GCC_VERSION: "14.2.rel1"
 
 jobs:
   build:
-    name: Build ${{ matrix.device_label }} Kernel
+    name: Build zumapro Kernel
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - codename: zuma
-            kernel_branch: 16.0.0-sultan
-            kernel_repo: https://github.com/kerneltoast/android_kernel_google_tensynos
-            anykernel_branch: sultan-zuma
-            defconfig: zuma_defconfig
-            dtb_path: google-devices/zuma/dts
-            device_label: zuma
-          - codename: gs201
-            kernel_branch: 16.0.0-sultan
-            kernel_repo: https://github.com/kerneltoast/android_kernel_google_tensynos
-            anykernel_branch: sultan-gs201
-            defconfig: gs201_defconfig
-            dtb_path: google-devices/gs201/dts
-            device_label: gs201
-          - codename: zumapro
-            kernel_branch: 16.0.0-sultan
-            kernel_repo: https://github.com/kerneltoast/android_kernel_google_tensynos
-            anykernel_branch: sultan-zumapro
-            defconfig: zumapro_defconfig
-            dtb_path: google-devices/zumapro/dts
-            device_label: zumapro
-
     outputs:
       ksu_ver: ${{ steps.meta.outputs.ksu_ver }}
       s_tag: ${{ steps.meta.outputs.s_tag }}
-
     steps:
       - uses: actions/checkout@v6
         with:
@@ -58,15 +29,20 @@ jobs:
 
       - name: Install GCC
         run: |
-          wget -q "${{ env.GCC_ARCHIVE_URL }}" -O gcc.tar.gz
+          BASE_URL="https://developer.arm.com/-/media/Files/downloads/gnu/"${{ env.GCC_VERSION }}"/binrel/"
+          ARCHIVE="arm-gnu-toolchain-"${{ env.GCC_VERSION }}"-x86_64-aarch64-none-linux-gnu.tar.xz"
+          
+          wget -q "${BASE_URL}/${ARCHIVE}" -O gcc.tar.gz
           tar -xf gcc.tar.gz
-          echo "GCC_PATH=$PWD/gcc-${{ env.GCC_VERSION }}-nolibc/aarch64-linux/bin/aarch64-linux-" >> "$GITHUB_ENV"
+          echo "GCC_PATH=$GITHUB_WORKSPACE/arm-gnu-toolchain-${{ env.GCC_VERSION }}-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-" >> "$GITHUB_ENV"
+
       - name: Clone Source
         run: |
-          git clone --depth=1 "${{ matrix.kernel_repo }}" -b "${{ matrix.kernel_branch }}" sultan
-          git clone --depth=1 "${{ env.ANYKERNEL_REPO }}" -b "${{ matrix.anykernel_branch }}" AK3
+          git clone --depth=1 https://github.com/kerneltoast/android_kernel_google_tensynos -b 16.0.0-sultan sultan
+          git clone --depth=1 "${{ env.ANYKERNEL_REPO }}" -b sultan-zumapro AK3
           git clone --depth=1 "${{ env.PATCHES_REPO }}" kernel_patches
           git clone --depth=1 "${{ env.SCRIPTS_REPO }}" sh
+
       - name: Metadata
         id: meta
         run: |
@@ -74,27 +50,29 @@ jobs:
           K_VER=$(./sh/get_ksuver.sh "backslashxx" "KernelSU" "${{ env.KSU_BRANCH }}" || echo "unknown")
           echo "ksu_ver=$K_VER" >> "$GITHUB_OUTPUT"
           echo "s_tag=$S_TAG" >> "$GITHUB_OUTPUT"
+
       - name: KSU & Patches
         working-directory: sultan
         run: |
-          #curl -LSs "https://raw.githubusercontent.com/${{ env.KSU_REPO }}/${{ env.KSU_COMMIT }}/kernel/setup.sh" | bash -s -- "${{ env.KSU_COMMIT }}"
           curl -LSs "https://raw.githubusercontent.com/${{ env.KSU_REPO }}/${{ env.KSU_BRANCH }}/kernel/setup.sh" | bash -s -- "${{ env.KSU_BRANCH }}"
           patch -p1 < ../kernel_patches/sultan/60_scripts_mkcompile_h.patch
           patch -p1 < ../kernel_patches/sultan/61_scripts_setlocalversion.patch
           patch -p1 < ../kernel_patches/sultan/62_init_Makefile.patch
+
       - name: NoMount & Patches
         working-directory: sultan
         run: |
           curl -LSs "https://raw.githubusercontent.com/maxsteeel/nomount/refs/heads/master/kernel/src/nomount.c" -o ./fs/nomount.c
           curl -LSs "https://raw.githubusercontent.com/maxsteeel/nomount/refs/heads/master/kernel/src/nomount.h" -o ./fs/nomount.h
           curl -LSs "https://raw.githubusercontent.com/maxsteeel/nomount/refs/heads/master/kernel/nomount_kernel_integration.patch" -o nomount.patch
-          chmod 777 nomount.patch
           patch -p1 --fuzz=3 < nomount.patch
+          
+
       - name: Global Defconfig Analysis
         working-directory: sultan
         run: |
           echo "=== Scanning All Relevant Defconfigs ==="
-          TARGET_DEFS=("gs201_defconfig" "zuma_defconfig" "zumapro_defconfig")
+          TARGET_DEFS=("zumapro_defconfig")
           CHECK_FLAGS=("CONFIG_NETFILTER_ADVANCED" "CONFIG_NETFILTER_XT_MATCH_ADDRTYPE" "CONFIG_KSU")
           for def in "${TARGET_DEFS[@]}"; do
             CONF_PATH="arch/arm64/configs/$def"
@@ -103,14 +81,14 @@ jobs:
               grep "$flag" "$CONF_PATH" || echo "  - $flag: missing"
             done
           done
+
       - name: Inject Configuration (Fortress Deep Unlock)
         working-directory: sultan
         env:
           CROSS_COMPILE: ${{ env.GCC_PATH }}
           CC: ${{ env.GCC_PATH }}gcc
         run: |
-          # Initialize base defconfig (Sultan de-GKIed)
-          make O=out CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" ${{ matrix.defconfig }}
+          make O=out CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" zumapro_defconfig
           
           cat >> out/.config <<EOF
           # --- Core System & FS ---
@@ -197,8 +175,9 @@ jobs:
           CONFIG_CGROUP_FREEZER=y
           CONFIG_INOTIFY_USER=y
           EOF
-          # Final Sync for Sultan de-GKIed dependencies
+          
           make O=out CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" olddefconfig
+
       - name: Build Kernel (Production)
         working-directory: sultan
         env:
@@ -207,27 +186,27 @@ jobs:
           CROSS_COMPILE: ${{ env.GCC_PATH }}
           CC: ${{ env.GCC_PATH }}gcc
         run: |
-          # Parallel build on all available cores
-          #make O=out CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" -j"$(nproc --all)"
-          make O=out CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" -j1 2>&1
+          make O=out CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" -j"$(nproc --all)"
+
       - name: Package
         run: |
           cp sultan/out/arch/arm64/boot/Image.lz4 AK3/Image.lz4
-          cat sultan/out/${{ matrix.dtb_path }}/*.dtb > AK3/dtb
-          ZIP_NAME="Sultan-${{ matrix.codename }}-$(date +'%Y%m%d')-xxKSU-r${{ steps.meta.outputs.ksu_ver }}.zip"
+          cat sultan/out/google-devices/zumapro/dts/*.dtb > AK3/dtb
+          ZIP_NAME="Sultan-zumapro-$(date +'%Y%m%d')-xxKSU-r${{ steps.meta.outputs.ksu_ver }}.zip"
           ( cd AK3 && zip -r9 "../$ZIP_NAME" . -x "*.git*" )
           echo "ZIP_PATH=$PWD/$ZIP_NAME" >> "$GITHUB_ENV"
+
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
-          name: Sultan-${{ matrix.codename }}
+          name: Sultan-zumapro
           path: ${{ env.ZIP_PATH }}
 
   release:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: write 
+      contents: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -235,6 +214,13 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           path: ./artifacts
+          merge-multiple: true
+      - name: List artifacts (debug)
+        run: |
+          echo "=== artifacts directory contents ==="
+          ls -la ./artifacts/
+          echo "=== find zip files ==="
+          find ./artifacts -name "*.zip" -type f
       - name: Tag and Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -245,12 +231,21 @@ jobs:
           MAX_REV=$(git tag -l "${DATE}-r*" | sed "s/${DATE}-r//" | sort -n | tail -n1)
           REV=$(( ${MAX_REV:-0} + 1 ))
           TAG="${DATE}-r${REV}"
+          
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git tag "$TAG"
           git push origin "$TAG"
           
-          gh release create "$TAG" artifacts/**/*.zip \
+          # Use find to locate the zip file
+          ZIP_FILE=$(find ./artifacts -name "*.zip" -type f | head -1)
+          if [ -z "$ZIP_FILE" ]; then
+            echo "No zip file found!"
+            exit 1
+          fi
+          echo "Found zip file: $ZIP_FILE"
+          
+          gh release create "$TAG" "$ZIP_FILE" \
             --title "Kernel Build — $TAG" \
             --notes "
             ### 🚀 Build Information
@@ -259,7 +254,7 @@ jobs:
             | **Kernel Base** | Sultan ($S_TAG) |
             | **Manager** | [backslashxx/KernelSU](https://github.com/backslashxx/KernelSU) |
             | **xxKSU Ver** | \`r$KSU_VER\` |
-            | **Compiler** | GCC 14.2.0 |
+            | **Compiler** | GCC 14.2.rel1 |
             | **Meta Module** | NoMount |
             
             ### 🛠️ Networking Features (Fortress)
@@ -267,5 +262,5 @@ jobs:
             - **Routing:** Policy Routing (Table 1066) + IPSet (64k)
             - **Fixes:** ADDRTYPE Match, Google VPN (XFRM), TTL 64 Share
             
-            > Built for Pixel 7, 8, and 9 Series."
+            > Built for Pixel 9 (zumapro)."
             
