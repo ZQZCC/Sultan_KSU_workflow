@@ -184,6 +184,7 @@ jobs:
           CROSS_COMPILE: ${{ env.TOOLCHAIN_PATH }}
           CC: ${{ env.TOOLCHAIN_PATH }}gcc
         run: |
+          sed -i '/echo "+"$/d' scripts/setlocalversion
           make O=out CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" LOCALVERSION_AUTO=0 -j"$(nproc --all)"
 
       - name: Package
