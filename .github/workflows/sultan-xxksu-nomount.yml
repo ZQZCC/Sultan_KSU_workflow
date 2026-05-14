@@ -1,4 +1,4 @@
-name: Build Sultan + xxKSU + NoMount
+name: Build Sultan + xxKSU +NoMount
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ env:
   SCRIPTS_REPO: https://github.com/TheSillyOk/sh
   KSU_REPO: backslashxx/KernelSU
   KSU_BRANCH: master
-  GCC_VERSION: "14.2.rel1"
+  GCC_VERSION: "14.2.0"
 
 jobs:
   build:
@@ -27,18 +27,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install GCC
+      - name: Install GCC (Dynamic Toolchain)
         run: |
-          BASE_URL="https://developer.arm.com/-/media/Files/downloads/gnu/"${{ env.GCC_VERSION }}"/binrel/"
-          ARCHIVE="arm-gnu-toolchain-"${{ env.GCC_VERSION }}"-x86_64-aarch64-none-linux-gnu.tar.xz"
+          # Construct URL dynamically from GCC_VERSION
+          BASE_URL="https://kernel.org/pub/tools/crosstool/files/bin/x86_64/${{ env.GCC_VERSION }}"
+          ARCHIVE="x86_64-gcc-${{ env.GCC_VERSION }}-nolibc-aarch64-linux.tar.gz"
           
+          echo "[+] Downloading GCC ${{ env.GCC_VERSION }}..."
           wget -q "${BASE_URL}/${ARCHIVE}" -O gcc.tar.gz
           tar -xf gcc.tar.gz
-          echo "GCC_PATH=$GITHUB_WORKSPACE/arm-gnu-toolchain-${{ env.GCC_VERSION }}-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-" >> "$GITHUB_ENV"
+          
+          # Set toolchain path dynamically
+          echo "TOOLCHAIN_PATH=$GITHUB_WORKSPACE/gcc-${{ env.GCC_VERSION }}-nolibc/aarch64-linux/bin/aarch64-linux-" >> $GITHUB_ENV
 
       - name: Clone Source
         run: |
-          git clone --depth=1 https://github.com/kerneltoast/android_kernel_google_tensynos -b 16.0.0-sultan sultan
+          git clone --depth=1 https://github.com/ZQZCC/android_kernel_google_tensynos -b 16.0.0-sultan sultan
           git clone --depth=1 "${{ env.ANYKERNEL_REPO }}" -b sultan-zumapro AK3
           git clone --depth=1 "${{ env.PATCHES_REPO }}" kernel_patches
           git clone --depth=1 "${{ env.SCRIPTS_REPO }}" sh
@@ -50,6 +54,9 @@ jobs:
           K_VER=$(./sh/get_ksuver.sh "backslashxx" "KernelSU" "${{ env.KSU_BRANCH }}" || echo "unknown")
           echo "ksu_ver=$K_VER" >> "$GITHUB_OUTPUT"
           echo "s_tag=$S_TAG" >> "$GITHUB_OUTPUT"
+          
+          G_VER=$(${{ env.TOOLCHAIN_PATH }}gcc --version | head -n1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+     
 
       - name: KSU & Patches
         working-directory: sultan
@@ -59,6 +66,8 @@ jobs:
           patch -p1 < ../kernel_patches/sultan/61_scripts_setlocalversion.patch
           patch -p1 < ../kernel_patches/sultan/62_init_Makefile.patch
 
+          patch -p1 < ../kernel_patches/sultan/selinux_hide.patch  
+          
       - name: NoMount & Patches
         working-directory: sultan
         run: |
@@ -183,10 +192,11 @@ jobs:
         env:
           KBUILD_BUILD_USER: build-user
           KBUILD_BUILD_HOST: build-host
-          CROSS_COMPILE: ${{ env.GCC_PATH }}
-          CC: ${{ env.GCC_PATH }}gcc
+          CROSS_COMPILE: ${{ env.TOOLCHAIN_PATH }}
+          CC: ${{ env.TOOLCHAIN_PATH }}gcc
         run: |
-          make O=out CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" -j"$(nproc --all)"
+          sed -i '/echo "+"$/d' scripts/setlocalversion
+          make O=out CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" LOCALVERSION_AUTO=0 -j"$(nproc --all)"
 
       - name: Package
         run: |
@@ -254,8 +264,8 @@ jobs:
             | **Kernel Base** | Sultan ($S_TAG) |
             | **Manager** | [backslashxx/KernelSU](https://github.com/backslashxx/KernelSU) |
             | **xxKSU Ver** | \`r$KSU_VER\` |
-            | **Compiler** | GCC 14.2.rel1 |
-            | **Meta Module** | NoMount |
+            | **MetaModule** | NoMount |
+            | **Compiler** | GCC 14.2.0 |
             
             ### 🛠️ Networking Features (Fortress)
             - **TCP Congestion:** BBR (v1) + FQ
@@ -263,4 +273,5 @@ jobs:
             - **Fixes:** ADDRTYPE Match, Google VPN (XFRM), TTL 64 Share
             
             > Built for Pixel 9 (zumapro)."
+
             
