@@ -2,35 +2,11 @@ name: Build Sultan + KowSU + SUSFS + Net
 
 on:
   workflow_dispatch:
-    inputs:
-      force_clean_build:
-        description: 'Force clean build'
-        required: false
-        default: false
-        type: boolean
-      create_release:
-        description: 'Create GitHub Release'
-        required: false
-        default: true
-        type: boolean
-      make_jobs:
-        description: 'Parallel jobs (auto or integer)'
-        required: false
-        default: 'auto'
-        type: string
-      kernel_ref:
-        description: 'Kernel ref'
-        required: false
-        default: 'android14-6.1-2026-03'
-        type: string
-      kowsu_ref:
-        description: 'KowSU ref'
-        required: false
-        default: 'master'
-        type: string
+    
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   build:
@@ -73,6 +49,7 @@ jobs:
           git clone --branch="gki-android14-6.1" "https://gitlab.com/simonpunk/susfs4ksu" susfs4ksu
 
       - name: Unname Patch
+        run: |
           cd kernel_workspace/common
           patch -p1 < ../kernel_patches/sultan/60_scripts_mkcompile_h.patch
           patch -p1 < ../kernel_patches/sultan/61_scripts_setlocalversion.patch
