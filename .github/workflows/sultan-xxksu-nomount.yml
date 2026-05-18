@@ -1,4 +1,4 @@
-name: Build Sultan + xxKSU +NoMount
+name: Build Sultan + xxKSU + NoMount
 
 on:
   workflow_dispatch:
@@ -66,7 +66,7 @@ jobs:
           patch -p1 < ../kernel_patches/sultan/61_scripts_setlocalversion.patch
           patch -p1 < ../kernel_patches/sultan/62_init_Makefile.patch
 
-        #  patch -p1 < ../kernel_patches/sultan/selinux_hide.patch  
+          patch -p1 < ../kernel_patches/sultan/selinux_hide-v2.patch  
           
       - name: NoMount & Patches
         working-directory: sultan
@@ -264,7 +264,7 @@ jobs:
             | **Kernel Base** | Sultan ($S_TAG) |
             | **Manager** | [backslashxx/KernelSU](https://github.com/backslashxx/KernelSU) |
             | **xxKSU Ver** | \`r$KSU_VER\` |
-            | **MetaModule** | NoMount |
+            | **Meta Module** | NoMount |
             | **Compiler** | GCC 14.2.0 |
             
             ### 🛠️ Networking Features (Fortress)
