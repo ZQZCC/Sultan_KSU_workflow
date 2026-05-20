@@ -34,7 +34,7 @@ jobs:
           - codename: zuma
             kernel_sublevel: "145"
             kernel_branch: 16.0.0-sultan
-            kernel_repo: https://github.com/ZQZCC/android_kernel_google_tensynos
+            kernel_repo: https://github.com/kerneltoast/android_kernel_google_tensynos
             anykernel_branch: sultan-zuma
             defconfig: zuma_defconfig
             dtb_path: google-devices/zuma/dts
@@ -43,7 +43,7 @@ jobs:
           - codename: gs201
             kernel_sublevel: "145"
             kernel_branch: 16.0.0-sultan
-            kernel_repo: https://github.com/ZQZCC/android_kernel_google_tensynos
+            kernel_repo: https://github.com/kerneltoast/android_kernel_google_tensynos
             anykernel_branch: sultan-gs201
             defconfig: gs201_defconfig
             dtb_path: google-devices/gs201/dts
@@ -52,7 +52,7 @@ jobs:
           - codename: zumapro
             kernel_sublevel: "145"
             kernel_branch: 16.0.0-sultan
-            kernel_repo: https://github.com/ZQZCC/android_kernel_google_tensynos
+            kernel_repo: https://github.com/kerneltoast/android_kernel_google_tensynos
             anykernel_branch: sultan-zumapro
             defconfig: zumapro_defconfig
             dtb_path: google-devices/zumapro/dts
@@ -389,7 +389,7 @@ jobs:
             |--------------|-------|
             | Manager      | [KOWX712/KernelSU](https://github.com/KOWX712/KernelSU) |
             | Variant      | Sultan (GCC) + KowSU + SUSFS |
-            | Sultan       | [${{ needs.build.outputs.sultan_tag }}](https://github.com/ZQZCC/android_kernel_google_tensynos/releases/tag/${{ needs.build.outputs.sultan_tag }}) |
+            | Sultan       | [${{ needs.build.outputs.sultan_tag }}](https://github.com/kerneltoast/android_kernel_google_tensynos/releases/tag/${{ needs.build.outputs.sultan_tag }}) |
             | KowSU        | `r${{ needs.build.outputs.ksu_ver }}` |
             | SUSFS        | `${{ needs.build.outputs.susfs_ver }}` |
             | Date         | ${{ env.RELEASE_TAG }} |
