@@ -98,7 +98,7 @@ jobs:
           
 
           # --- Pillar 1: xxKSU (Hookless / LSM) ---
-          CONFIG_KSU=y
+          CONFIG_KSU=m
           CONFIG_KSU_EXTRAS=y
           CONFIG_KSU_ALLOWLIST_WORKAROUND=n
           CONFIG_KSU_DEBUG=n
