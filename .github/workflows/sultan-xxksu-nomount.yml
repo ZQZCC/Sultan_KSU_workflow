@@ -253,9 +253,9 @@ jobs:
             | Component | Details |
             | :--- | :--- |
             | **Kernel Base** | Sultan (0314) |
-            | **Manager** | [backslashxx/KernelSU](https://github.com/backslashxx/KernelSU) |
+            | **Manager** | [xxKSU](https://github.com/backslashxx/KernelSU) |
             | **xxKSU Ver** | \`r$KSU_VER\` |
-            | **Meta Module** | NoMount |
+            | **NoMount Ver** | 1.0.0 |
             | **Compiler** | GCC 14.2.rel1 |
             
             ### 🛠️ Networking Features (Fortress)
