@@ -263,7 +263,7 @@ jobs:
             | Component | Details |
             | :--- | :--- |
             | **Kernel Base** | Sultan ($S_TAG) |
-            | **Manager** | [KOWX712/KernelSU](https://github.com/KOWX712/KernelSU) |
+            | **Manager** | [KowSU](https://github.com/KOWX712/KernelSU) |
             | **KowSU Ver** | \`r$KSU_VER\` |
             | **SuSFS Ver** | \`$SUSFS_VER\` |
             | **Compiler** | GCC 14.2.rel1 |
