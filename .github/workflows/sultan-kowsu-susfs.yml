@@ -240,7 +240,7 @@ jobs:
           
           CLEAN_S_TAG=$(echo "${{ steps.meta.outputs.s_tag }}" | sed 's/[^a-zA-Oa-z0-9._-]/_/g')
           
-          ZIP_NAME="Sultan-zumapro-${CLEAN_S_TAG}-KowSU-SUSFS-mini-${{ steps.meta.outputs.susfs_ver }}+${{ steps.meta.outputs.ksu_ver }}.zip"
+          ZIP_NAME="Sultan-zumapro-KowSU-${{ steps.meta.outputs.ksu_ver }}-SUSFS-mini-${{ steps.meta.outputs.susfs_ver }}.zip"
           ( cd AK3 && zip -r9 "../$ZIP_NAME" . -x "*.git*" )
           echo "ZIP_PATH=$PWD/$ZIP_NAME" >> "$GITHUB_ENV"
           echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_ENV"
