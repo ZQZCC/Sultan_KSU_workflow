@@ -259,7 +259,7 @@ jobs:
           gh release create "$TAG" "${{ env.ZIP_PATH }}" \
             --title "Kernel Build Mini — $TAG" \
             --notes "
-            ### 🚀 Build Information (Minimal)
+            ### 🚀 Build Information
             | Component | Details |
             | :--- | :--- |
             | **Sultan** | \`$S_TAG\` |
