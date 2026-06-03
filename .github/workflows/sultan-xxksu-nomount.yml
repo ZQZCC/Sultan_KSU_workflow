@@ -252,11 +252,11 @@ jobs:
             ### 🚀 Build Information
             | Component | Details |
             | :--- | :--- |
-            | **Kernel Base** | Sultan (0314) |
+            | **Sultan** | \`$S_TAG\` |
             | **Manager** | [xxKSU](https://github.com/backslashxx/KernelSU) |
-            | **xxKSU Ver** | \`r$KSU_VER\` |
-            | **NoMount** | v1.0.0 |
-            | **Compiler** | GCC 14.2.rel1 |
+            | **xxKSU** | \`$KSU_VER\` |
+            | **NoMount** | \`v1.0.0\` |
+            | **Compiler** | \`$GCC_VERSION\` |
             
             ### 🛠️ Networking Features (Fortress)
             - **TCP Congestion:** BBR (v1) + FQ
