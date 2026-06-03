@@ -5,7 +5,7 @@ A high-performance, security-focused kernel for Pixel 9 series (zumapro), mergin
 ## 🚀 Key Features
 - **Stealth Core:** Integrated **SUSFS** support and **KernelSU** (xxKSU/KowSU variants).
 - **Fortress Networking:** Full support for `atp4pixel` suite including BBR v1, IPSet (64k), and XFRM sub-policies.
--**NoMount:** A kernel-based file injection and path redirection framework for Android kernels.
+- **NoMount:** A kernel-based file injection and path redirection framework for Android kernels.
 - **Hookless Security:** Option for hookless xxKSU via LSM security hooks (No KProbes).
 
 ---
