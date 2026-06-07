@@ -253,7 +253,7 @@ jobs:
           SUSFS_VER: ${{ steps.meta.outputs.susfs_ver }}
         run: |
           DATE=$(date +"%Y.%m.%d")
-          TAG="${DATE}-mini-${{ github.run_number }}"
+          TAG="${DATE}-n${{ github.run_number }}"
           
          
           gh release create "$TAG" "${{ env.ZIP_PATH }}" \
